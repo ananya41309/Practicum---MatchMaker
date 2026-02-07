@@ -1,4 +1,4 @@
-# Research Project Submission App
+# Researchr
 
 This is a simple Flask web application that allows users to submit a research project description along with relevant files (e.g., papers, datasets, notes). The long-term goal of this project is to assist researchers not only in managing project materials, but also in identifying relevant funding opportunities by automatically matching project descriptions to external grant programs.
 
