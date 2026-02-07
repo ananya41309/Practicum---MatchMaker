@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Researchr</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Researchr</h1>
+    <p class="subtitle">
+      Describe your research project and upload any relevant files, and we'll find you grants that you can apply to for funding!
+    </p>
+
+    <form class="project-form" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="title">Project Title</label>
+        <input type="text" id="title" name="title" required />
+      </div>
+
+      <div class="form-group">
+        <label for="description">Project Description</label>
+        <textarea
+          id="description"
+          name="description"
+          rows="6"
+          required
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="files">Relevant Files</label>
+        <input type="file" id="files" name="files" multiple />
+        <small>PDF, DOCX, CSV, TXT</small>
+      </div>
+
+      <button type="submit">Submit Project</button>
+    </form>
+  </div>
+</body>
+</html>
