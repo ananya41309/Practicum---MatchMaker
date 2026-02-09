@@ -75,3 +75,46 @@ button {
 button:hover {
   background-color: #2563eb;
 }
+
+.results-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 30px;
+}
+
+.result-card {
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #fafafa;
+}
+
+.grant-title {
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+}
+
+.relevance {
+  margin: 6px 0;
+  color: #374151;
+}
+
+.explanation {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.actions {
+  margin-top: 30px;
+}
+
+.back-link {
+  text-decoration: none;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}

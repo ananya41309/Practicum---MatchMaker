@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.utils import secure_filename
 import os
 
+#DELETE
+from demodata import grants
+
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "uploads"
@@ -31,9 +34,20 @@ def index():
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
-        return redirect(url_for("index"))
+        #return redirect(url_for("index"))
 
     return render_template("index.html")
+
+@app.route("/search", methods=["POST"])
+def search():
+    title = request.form["title"]
+    description = request.form["description"]
+
+    #project_text = f"{title} {description}"
+
+    results = grants #match_grants(project_text, grants)
+
+    return render_template("results.html", results=results, title=title, description=description)
 
 
 if __name__ == "__main__":

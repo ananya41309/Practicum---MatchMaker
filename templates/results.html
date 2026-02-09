@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Grant Search Results</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Recommended Grants for "{{ title }}"</h1>
+
+    <p class="subtitle">
+      Based on your project description, the following grants may be relevant.
+    </p>
+    <p class="subtitle">
+      <b>Description:</b> {{ description }}
+    </p>
+
+    {% if results and results|length > 0 %}
+      <ul class="results-list">
+        {% for result in results %}
+          <li class="result-card">
+            <h2 class="grant-title">{{ result.title }}</h2>
+
+            <p class="relevance">
+              Relevance score: 1.00
+            </p>
+
+            <!-- Optional placeholder for future explanation -->
+            <p class="explanation">
+              Matched based on similarity between your project description and the grant abstract.
+            </p>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No relevant grants were found for this project.</p>
+    {% endif %}
+
+    <div class="actions">
+      <a href="{{ url_for('index') }}" class="back-link">
+        ← Back to project submission
+      </a>
+    </div>
+  </div>
+</body>
+</html>

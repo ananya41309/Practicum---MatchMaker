@@ -12,7 +12,7 @@
       Describe your research project and upload any relevant files, and we'll find you grants that you can apply to for funding!
     </p>
 
-    <form class="project-form" method="POST" enctype="multipart/form-data">
+    <form class="project-form" method="POST" enctype="multipart/form-data" action="{{ url_for('search') }}">
       <div class="form-group">
         <label for="title">Project Title</label>
         <input type="text" id="title" name="title" required />
