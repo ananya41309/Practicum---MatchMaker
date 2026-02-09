@@ -7,12 +7,15 @@ This is a simple Flask web application that allows users to submit a research pr
 - Project title and description input
 - Multiple file uploads
 - Basic file type validation
+- Displaying search results (WIP)
 
 ## Planned Features
 
 - **Grant Matching**
   - Given a research project description and uploaded materials, the system will identify relevant grants that the researcher may be eligible to apply for.
   - Grant recommendations may be based on keywords, research area, eligibility criteria, and funding agency priorities.
+- **Refined Searching**
+  - The researcher will be able to filter their search for specific grants, due dates, funding amounts, organizations, etc.
 
 ## Tech Stack
 
@@ -40,7 +43,8 @@ venv\Scripts\activate         # Windows
 ```
 ### 3. Install dependencies
 ```bash
-pip install flask werkzeug
+pip install -r requirements.txt
+
 ```
 ### 4. Run the application
 ```bash
