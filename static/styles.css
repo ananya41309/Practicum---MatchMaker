@@ -12,7 +12,7 @@ body {
 }
 
 .container {
-  max-width: 700px;
+  max-width: 1000px;
   margin: 60px auto;
   padding: 40px;
   background: #ffffff;
@@ -63,7 +63,7 @@ small {
 button {
   margin-top: 10px;
   padding: 12px 20px;
-  background-color: #3b82f6;
+  background-color: #4E2A84;
   color: white;
   border: none;
   border-radius: 6px;
@@ -73,7 +73,7 @@ button {
 }
 
 button:hover {
-  background-color: #2563eb;
+  background-color: #836EAA;
 }
 
 .results-list {
