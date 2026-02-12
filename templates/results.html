@@ -23,8 +23,9 @@
             <h2 class="grant-title">{{ result.title }}</h2>
 
             <p class="relevance">
-              Relevance score: 1.00
+              Relevance score: {{ result.relevance }}
             </p>
+            
             <p class="grant-description">
               {{ result.description | safe}}
             </p>

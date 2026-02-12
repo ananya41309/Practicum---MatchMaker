@@ -24,6 +24,20 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+def compute_relevance(grant_text, keywords):
+    grant_text = grant_text.lower()
+    score = 0
+    
+    for keyword in keywords:
+        if keyword.lower() in grant_text:
+            score += 1
+
+    if len(keywords) == 0:
+        return 0
+
+    return round(score / len(keywords), 2)
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
@@ -119,8 +133,14 @@ def search():
             
     #project_text = f"{title} {description}"
 
-    results = grants #match_grants(project_text, grants)
-    
+    for grant in grants:
+        grant_text = grant.get("description", "")
+        relevance = compute_relevance(grant_text, merged_keywords)
+        grant["relevance"] = relevance
+
+    # Sort grants by relevance score in descending order
+    results = sorted(grants, key=lambda x: x["relevance"], reverse=True)
+        
     return render_template("results.html", results=results, title=title, description=description)
 
 
