@@ -65,6 +65,12 @@ def search():
     # merge + remove duplicates
     merged_keywords = list(set(doc_keywords + desc_keywords))
 
+    print("\n--- KEYWORD DEBUG ---")
+    print("Document Keywords:", doc_keywords)
+    print("Description Keywords:", desc_keywords)
+    print("Merged Keywords:", merged_keywords)
+    print("----------------------\n")
+
     keyword_string = " ".join(merged_keywords)
     combined_text = f"{title} {description} {keyword_string}"
 
