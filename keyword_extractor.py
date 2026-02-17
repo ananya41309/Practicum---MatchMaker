@@ -4,7 +4,8 @@ from collections import Counter
 STOPWORDS = {
     "the", "and", "of", "to", "in", "for", "on", "with", "as", "by",
     "an", "is", "are", "was", "were", "this", "that", "from", "or",
-    "at", "be", "has", "have", "it", "its", "we", "our"
+    "at", "be", "has", "have", "it", "its", "we", "our", "will", "project", "research", "study", "data", "analysis", "results", "conclusion",
+    "method", "methods", "approach", "approaches", "findings"
 }
 
 def extract_keywords(text, top_n=10):

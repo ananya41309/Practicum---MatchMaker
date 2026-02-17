@@ -29,14 +29,20 @@ def compute_relevance(grant_text, keywords):
     grant_text = grant_text.lower()
     score = 0
     
-    for keyword in keywords:
+    """for keyword in keywords:
         if keyword.lower() in grant_text:
             score += 1
-
+    """
+    
+    for word in grant_text.split():
+        if word in keywords:
+            print("bing")
+            score += 1.0
+            
     if len(keywords) == 0:
         return 0
 
-    return round(score / len(keywords), 2)
+    return round(score / len(set(grant_text.split())), 2)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -86,7 +92,7 @@ def search():
     print("----------------------\n")
 
     keyword_string = " ".join(merged_keywords)
-    combined_text = f"{title} {description} {keyword_string}"
+    combined_text = f"{title} {keyword_string}"
 
 
 
@@ -108,6 +114,31 @@ def search():
         hits = data.get("oppHits", [])
         #print(hits)    
         grants = []
+        
+        while not hits and merged_keywords:
+            #remove last 2 keywords and try again
+            merged_keywords = merged_keywords[:-2]
+            keyword_string = " ".join(merged_keywords)
+            combined_text = f"{title} {keyword_string}"
+            
+            payload = {
+                "oppStatuses": "forecasted|posted",
+                "keyword": combined_text,
+            }
+            
+            print("\n--- KEYWORD DEBUG ---")
+            print("Document Keywords:", doc_keywords)
+            print("Description Keywords:", desc_keywords)
+            print("Merged Keywords:", merged_keywords)
+            print(payload)
+            print("----------------------\n")
+            
+            response = requests.post(search_url, headers=headers, data=json.dumps(payload))
+            if response.status_code == 200:
+                res = response.json()
+                data = res.get("data", {})
+                hits = data.get("oppHits", [])
+            
         for hit in hits[:10]:  # Limit to top 10 results
         
             hit_title = hit.get("title", "No Title")
@@ -137,12 +168,18 @@ def search():
         grant_text = grant.get("description", "")
         relevance = compute_relevance(grant_text, merged_keywords)
         grant["relevance"] = relevance
+        print(relevance)
 
     # Sort grants by relevance score in descending order
     results = sorted(grants, key=lambda x: x["relevance"], reverse=True)
-        
+    
+    best_relevance = results[0]["relevance"] if results else 0
+    
+    for grant in results:
+        grant["relevance"] = round((grant["relevance"] / best_relevance), 2) if best_relevance > 0 else 0
+        print(f"Title: {grant['title']}, Relevance: {grant['relevance']}")
+    
     return render_template("results.html", results=results, title=title, description=description)
-
 
 if __name__ == "__main__":
     app.run(debug=True)
