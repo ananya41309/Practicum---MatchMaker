@@ -148,6 +148,12 @@ def search():
                 "opportunityId": hit_id
             }
             print(hit_id)
+            hit_opendate = hit.get("openDate", "N/A")
+            if hit_opendate == "":
+                hit_opendate = "N/A"
+            hit_closedate = hit.get("closeDate", "N/A")
+            if hit_closedate == "":
+                hit_closedate = "N/A"
             opp_response = requests.post(fetchOpp_url, data=json.dumps(opp_payload))
             if opp_response.status_code == 200:
                 opp_data = opp_response.json().get("data", {})
@@ -156,10 +162,13 @@ def search():
                     opp_desc = opp_data.get("synopsis", {}).get("synopsisDesc", "No Description")
                 else:
                     opp_desc = opp_data.get("forecast", {}).get("forecastDesc", "No Description")
+                    
                 grants.append({
                     "id": hit_id,
                     "title": hit_title,
-                    "description": opp_desc
+                    "description": opp_desc,
+                    "openDate": hit_opendate,
+                    "closeDate": hit_closedate
                 })
             
     #project_text = f"{title} {description}"
