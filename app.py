@@ -36,7 +36,7 @@ def compute_relevance(grant_text, keywords):
     
     for word in grant_text.split():
         if word in keywords:
-            print("bing")
+
             score += 1.0
             
     if len(keywords) == 0:
@@ -191,7 +191,6 @@ def search():
         grant_text = grant.get("description", "")
         relevance = compute_relevance(grant_text, merged_keywords)
         grant["relevance"] = relevance
-        print(relevance)
 
     # Sort grants by relevance score in descending order
     results = sorted(grants, key=lambda x: x["relevance"], reverse=True)

@@ -14,8 +14,14 @@ This is a simple Flask web application that allows users to submit a research pr
 - **Grant Matching**
   - Given a research project description and uploaded materials, the system will identify relevant grants that the researcher may be eligible to apply for.
   - Grant recommendations may be based on keywords, research area, eligibility criteria, and funding agency priorities.
+- **Wider Searching for Sources**
+  - Currently we are just pulling from one site (grants.gov)
+  - Eventually we will look to source from other places for funding, e.g. foundations, non-profits, companies with RFPs.
 - **Refined Searching**
   - The researcher will be able to filter their search for specific grants, due dates, funding amounts, organizations, etc.
+  - In addition, the researcher will be able to sort the results for certain features e.g. opening date, grant amount, etc.
+- **Results Saving and Accounts**
+  - Users will eventually be able to store results within accounts and saved "conversations".
 
 ## Tech Stack
 
