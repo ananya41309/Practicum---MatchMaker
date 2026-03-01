@@ -48,10 +48,13 @@
               </p>
             {% endif %}
 
-            <p class="grant-description">
-              {{ result.description | safe}}
-            </p>
-
+            <div class="description-wrapper">
+              <div class="grant-description">
+                {{ result.description | safe}}
+              </div>
+              <div class="fade"></div>
+            </div>
+            <button class="read-more-btn" onclick="toggleDescription(this)">Read more</button>
             <button class="apply-button" onclick="window.open('https://www.grants.gov/search-results-detail/{{ result.id }}', '_blank')">
               View Grant Details
             </button>
@@ -72,5 +75,15 @@
       </a>
     </div>
   </div>
+  <script>
+    function toggleDescription(btn) {
+      const card = btn.closest(".result-card");
+      const description = card.querySelector(".grant-description");
+      const fade = card.querySelector(".fade");
+      const isExpanded = description.classList.toggle("expanded");
+      if (fade) fade.style.opacity = isExpanded ? "0" : "1";
+      btn.textContent = isExpanded ? "Read less" : "Read more";
+    }
+  </script>
 </body>
 </html>

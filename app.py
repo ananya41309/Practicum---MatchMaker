@@ -1,10 +1,12 @@
+import time
+
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.utils import secure_filename
 import os, requests, json
 from file_parser import parse_file
 from keyword_extractor import extract_keywords
-
-
+from google import genai
+from api_key import api_key
 
 #DELETE
 #from demodata import grants
@@ -17,6 +19,8 @@ UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"pdf", "docx", "csv", "txt"}
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+client = genai.Client(api_key=api_key)
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -167,13 +171,24 @@ def search():
                     award_ceiling = opp_data.get("forecast", {}).get("awardCeiling")
                     award_floor = opp_data.get("forecast", {}).get("awardFloor")
 
+                """if opp_desc != "No Description":
+                    try:
+                        response = client.models.generate_content(
+                            model="gemini-3-flash-preview", contents="Return only the relevant output. Given this description of a grant opportunity, summarize the description: " + opp_desc
+                        )
+                        opp_desc = response.text
+                    except Exception as e:
+                        print("Error generating summary:", e)
+                        pass
+                    time.sleep(1)"""
+                
                 average_award = None
                 try:
                     if award_ceiling and award_floor:
                         average_award = (int(award_ceiling) + int(award_floor)) // 2
                 except ValueError:
                     average_award = None
-                    
+                
                 grants.append({
                     "id": hit_id,
                     "title": hit_title,

@@ -94,7 +94,37 @@ button:hover {
   margin: 0 0 8px 0;
   font-size: 1.2rem;
 }
+.description-wrapper {
+      position: relative;
+    }
 
+.grant-description {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: #444;
+      max-height: 5.1em; /* 3 lines x 1.7 line-height */
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+.grant-description.expanded {
+      max-height: none;
+    }
+
+    .fade {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2em;
+      background: linear-gradient(transparent, #fff);
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .grant-description.expanded + .fade {
+      opacity: 0;
+    }
 .relevance {
   margin: 6px 0;
   color: #374151;
