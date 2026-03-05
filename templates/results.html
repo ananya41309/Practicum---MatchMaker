@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Grant Search Results</title>
+  <title>MatchMaker's Grant Search Results</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
@@ -45,7 +45,7 @@
             {% else %}
               {% if result.amount != "none"%}
               <p>
-                <strong>Award Range: {{ result.amount }}</strong>
+                <strong>Award Range: </strong>{{ result.amount }}
               </p>
               {% else %}
               <p><strong>Award Range:</strong> N/A</p>

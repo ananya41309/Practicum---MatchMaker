@@ -27,9 +27,12 @@
 
       <div class="form-group file-upload-group">
         <label for="files" class="upload-label">Upload Relevant Documents</label>
-        <input type="file" id="files" name="files" multiple />
+        <input type="file" id="files" name="files" accept=".pdf,.doc,.docx,.txt,.csv" multiple />
         <small>PDF, DOCX, CSV, TXT</small>
+
       </div>
+      
+      <div class="form-group"id="fileList"></div>
 
       <!-- Filter Section -->
       <button type="button" id="filterToggle" class="btn action-btn filter-btn">Filters</button>
@@ -103,6 +106,40 @@
 
       filtersSidebar.classList.add('hidden');
     };
+    function returnFileSize(number) {
+      if (number < 1024) {
+          return number + ' bytes';
+      } else if (number >= 1024 && number < 1048576) {
+          return (number / 1024).toFixed(1) + ' KB';
+      } else if (number >= 1048576) {
+          return (number / 1048576).toFixed(1) + ' MB';
+      } else {
+          return (number / 1073741824).toFixed(1) + ' GB';
+      }
+    }
+
+    document.getElementById("files").addEventListener("change", function(event) {
+            const files = event.target.files;
+            const fileList = document.getElementById("fileList");
+
+            // Clear previous list
+            fileList.innerHTML = "";
+            if (files.length > 1) {
+              
+              const header = document.createElement("label");
+              header.textContent = "Selected Files:";
+              fileList.appendChild(header);
+              const ul = document.createElement("ul");
+              for (let i = 0; i < files.length; i++) {
+                const li = document.createElement("li");
+                li.textContent = files[i].name + " (" + returnFileSize(files[i].size) + ")";
+                ul.appendChild(li);
+              }
+              fileList.appendChild(ul);
+            }
+            
+            
+        });
   </script>
 
 </body>

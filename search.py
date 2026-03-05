@@ -156,7 +156,7 @@ def grants_gov_search(title, keywords):
                 data = res.get("data", {})
                 hits = data.get("oppHits", [])
             
-        for hit in hits[:20]:  # Limit to top 10 results
+        for hit in hits[:40]:
         
             hit_title = hit.get("title", "No Title")
             print(hit)
@@ -194,14 +194,17 @@ def grants_gov_search(title, keywords):
                         print("Error generating summary:", e)
                         pass
                     time.sleep(1)"""
-                
                 average_award = None
                 try:
                     if award_ceiling and award_floor:
                         average_award = (int(award_ceiling) + int(award_floor)) // 2
                 except ValueError:
                     average_award = None
+                    award_ceiling = None
+                    award_floor = None
                 
+                print("Award Ceiling:", award_ceiling)
+                print("Award Floor:", award_floor)
                 grants.append({
                     "id": hit_id,
                     "title": hit_title,
