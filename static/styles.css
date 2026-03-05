@@ -311,3 +311,30 @@ input[type="file"]::file-selector-button:hover {
 input[type="file"]::file-selector-button:active {
   background-color: #e5e7eb;
 }
+
+#scrollTopBtn, #scrollBottomBtn {
+    position: fixed;
+    right: 20px;
+    width: 10%;
+    height: 45px;
+    /*border: none;
+    border-radius: %;
+    background-color: #333;
+    color: white;
+    font-size: 20px;*/
+    cursor: pointer;
+    z-index: 1000;
+}
+
+#scrollTopBtn {
+    top: 20px;
+}
+
+#scrollBottomBtn {
+    bottom: 20px;
+}
+
+#scrollTopBtn:hover,
+#scrollBottomBtn:hover {
+    background-color: #555;
+}

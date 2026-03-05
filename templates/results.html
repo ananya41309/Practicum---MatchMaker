@@ -6,7 +6,11 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+
+  
   <div class="container">
+    <button class="btn" id="scrollTopBtn">Scroll to Top ↑</button>
+    <button class="btn" id="scrollBottomBtn">Scroll to Bottom ↓</button>
     <h1>Recommended Grants for "{{ title }}"</h1>
 
     <p class="subtitle">
@@ -86,9 +90,30 @@
       const description = card.querySelector(".grant-description");
       const fade = card.querySelector(".fade");
       const isExpanded = description.classList.toggle("expanded");
+
+      if (!isExpanded) {
+        card.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+      }
+
       if (fade) fade.style.opacity = isExpanded ? "0" : "1";
       btn.textContent = isExpanded ? "Read less" : "Read more";
     }
+    document.getElementById("scrollTopBtn").onclick = function () {
+      window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+      });
+    };
+
+    document.getElementById("scrollBottomBtn").onclick = function () {
+        window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: "smooth"
+        });
+    };
   </script>
 </body>
 </html>
