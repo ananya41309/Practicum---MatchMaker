@@ -5,6 +5,8 @@ from werkzeug.utils import secure_filename
 import os
 from file_parser import parse_file
 from keyword_extractor import extract_keywords
+from openai import OpenAI
+from api_key import api_key
 #from google import genai
 
 from search import search_grants
@@ -22,7 +24,7 @@ ALLOWED_EXTENSIONS = {"pdf", "docx", "csv", "txt"}
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 #client = genai.Client(api_key=api_key)
-#client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -67,7 +69,6 @@ def index():
                 keywords = extract_keywords(extracted_text)
                 app.config["KEYWORDS"] = keywords
 
-
         # Store parsed text temporarily (simple approach)
         app.config["PARSED_TEXT"] = extracted_text
 
@@ -95,126 +96,21 @@ def search():
     print("Merged Keywords:", merged_keywords)
     print("----------------------\n")
 
-    results = search_grants(title, description, merged_keywords)
+    response = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant for ranking grant opportunities based on relevance to a researcher's interests."},
+            {"role": "user", "content": f"Given these details about the research project: {title} {description} {file_text}, please generate a list of the top 10 keywords that best represent the researcher's interests and the project focus. These keywords will be used to search for relevant grant opportunities. Please return only the keywords in a list format without any additional text or explanation, separated only by spaces."}
+        ]
+    )
+    ds_keywords = response.choices[0].message.content.strip().split()
+    print(ds_keywords)
     
+    results = search_grants(title, description, ds_keywords, client)
+    #results = search_grants(title, description, merged_keywords, client)
     
-    """
-
-    #build json request
-    payload = {
-        "oppStatuses": "forecasted|posted",
-        "keyword": combined_text,
-    }
-
-    headers = {  
-        "Content-Type": "application/json",
-    }
-    
-    response = requests.post(search_url, headers=headers, data=json.dumps(payload))
-    if response.status_code == 200:
-        res = response.json()
-        #print("API Response:", res)
-        data = res.get("data", {})
-        hits = data.get("oppHits", [])
-        #print(hits)    
-        grants = []
-        
-        while not hits and merged_keywords:
-            #remove last 2 keywords and try again
-            merged_keywords = merged_keywords[:-2]
-            keyword_string = " ".join(merged_keywords)
-            combined_text = f"{title} {keyword_string}"
-            
-            payload = {
-                "oppStatuses": "forecasted|posted",
-                "keyword": combined_text,
-            }
-            
-            print("\n--- KEYWORD DEBUG ---")
-            print("Document Keywords:", doc_keywords)
-            print("Description Keywords:", desc_keywords)
-            print("Merged Keywords:", merged_keywords)
-            print(payload)
-            print("----------------------\n")
-            
-            response = requests.post(search_url, headers=headers, data=json.dumps(payload))
-            if response.status_code == 200:
-                res = response.json()
-                data = res.get("data", {})
-                hits = data.get("oppHits", [])
-            
-        for hit in hits[:10]:  # Limit to top 10 results
-        
-            hit_title = hit.get("title", "No Title")
-            print(hit)
-            hit_id = hit.get("id", 0)
-            opp_payload = {
-                "opportunityId": hit_id
-            }
-            print(hit_id)
-            hit_opendate = hit.get("openDate", "N/A")
-            if hit_opendate == "":
-                hit_opendate = "N/A"
-            hit_closedate = hit.get("closeDate", "N/A")
-            if hit_closedate == "":
-                hit_closedate = "N/A"
-            opp_response = requests.post(fetchOpp_url, data=json.dumps(opp_payload))
-            if opp_response.status_code == 200:
-                opp_data = opp_response.json().get("data", {})
-                #print("Opportunity Data:", opp_data)
-                if not opp_data.get("forecast", {}):
-                    opp_desc = opp_data.get("synopsis", {}).get("synopsisDesc", "No Description")
-                    award_ceiling = opp_data.get("synopsis", {}).get("awardCeiling")
-                    award_floor = opp_data.get("synopsis", {}).get("awardFloor")
-                else:
-                    opp_desc = opp_data.get("forecast", {}).get("forecastDesc", "No Description")
-                    award_ceiling = opp_data.get("forecast", {}).get("awardCeiling")
-                    award_floor = opp_data.get("forecast", {}).get("awardFloor")
-
-                if opp_desc != "No Description":
-                    try:
-                        response = client.models.generate_content(
-                            model="gemini-3-flash-preview", contents="Return only the relevant output. Given this description of a grant opportunity, summarize the description: " + opp_desc
-                        )
-                        opp_desc = response.text
-                    except Exception as e:
-                        print("Error generating summary:", e)
-                        pass
-                    time.sleep(1)
-                
-                average_award = None
-                try:
-                    if award_ceiling and award_floor:
-                        average_award = (int(award_ceiling) + int(award_floor)) // 2
-                except ValueError:
-                    average_award = None
-                
-                grants.append({
-                    "id": hit_id,
-                    "title": hit_title,
-                    "description": opp_desc,
-                    "openDate": hit_opendate,
-                    "closeDate": hit_closedate,
-                    "award_ceiling": award_ceiling,
-                    "award_floor": award_floor,
-                    "average_award": average_award
-                })
-            
-    #project_text = f"{title} {description}"
-
-    for grant in grants:
-        grant_text = grant.get("description", "")
-        relevance = compute_relevance(grant_text, merged_keywords)
-        grant["relevance"] = relevance
-
-    # Sort grants by relevance score in descending order
-    results = sorted(grants, key=lambda x: x["relevance"], reverse=True)
-    
-    best_relevance = results[0]["relevance"] if results else 0
-    
-    for grant in results:
-        grant["relevance"] = round((grant["relevance"] / best_relevance), 2) if best_relevance > 0 else 0
-        print(f"Title: {grant['title']}, Relevance: {grant['relevance']}")"""
+    if len(description) > 500:
+        description = description[:500] + "..."
     
     return render_template("results.html", results=results, title=title, description=description)
 

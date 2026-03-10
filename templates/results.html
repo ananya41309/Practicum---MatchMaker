@@ -26,9 +26,9 @@
           <li class="result-card">
             <h2 class="grant-title">{{ result.title }}</h2>
 
-            <p class="relevance">
+            <!--<p class="relevance">
               Relevance score: {{ result.score }}
-            </p>
+            </p>-->
             <p><b>Open Date:</b> {{ result.openDate }} <b>Close Date:</b> {{ result.closeDate }}</p>
 
             <!-- Show award range if available -->
@@ -67,17 +67,16 @@
             <button class="apply-button" onclick="window.open('{{ result.url }}', '_blank')">
               View Grant Details
             </button>
-            <!-- Optional placeholder -->
-            <p class="explanation">
-              Matched based on similarity between your project description and the grant abstract.
-            </p>
           </li>
         {% endfor %}
       </ul>
     {% else %}
       <p>No relevant grants were found for this project.</p>
     {% endif %}
-
+    
+    <p class="explanation">
+      Matched based on similarity between your project description and the grant abstract.
+    </p>
     <div class="actions">
       <a href="{{ url_for('index') }}" class="back-link">
         ← Back to project submission

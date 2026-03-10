@@ -83,11 +83,13 @@ ALLOWED_EXTENSIONS = {"pdf", "docx", "csv", "txt"}
 ~~- GET API KEY - Hongbo~~
 ~~- Description summarization - Nick~~
 - Filters working - Hongbo
-- Get 10 good outputs - Nick / Hongbo  
+- Build a strong test suite from recent grant distributions
+- Get 10 good outputs - Nick / Hongbo
 - General UI updates (modernization) - Ananya 
 - Display filters on sidebar + edit search feature - Ananya
+- Add corporate funding sources 
 
 # Nice to Haves / Additional Task Board
-- File preview (optional - low prio)
+- File preview
 - Accounts - Ananya 
   - Set up Firebase / database management - Ananya

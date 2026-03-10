@@ -14,9 +14,9 @@ search_url = "https://api.grants.gov/v1/api/search2"
 fetchOpp_url = "https://api.grants.gov/v1/api/fetchOpportunity"
 nufr_url = "https://www.northwestern.edu/foundationrelations/find-funding/funding-opportunities/"
 
-client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+#client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
-def search_grants(title, description, keywords):
+def search_grants(title, description, keywords, client):
     #given keyword string, we are going to search through various sources for grants that match the keywords. We will return a list of grants that match the keywords.
     results = []
     
