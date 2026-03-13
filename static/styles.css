@@ -6,9 +6,35 @@
 
 body {
   margin: 0;
-  padding: 0;
+  padding: 20px;
   background-color: #f5f7fa;
   color: #333;
+}
+
+.main-layout {
+  display: flex;
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+
+.content-area {
+  flex: 1;
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.filters-sidebar {
+  width: 280px;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 20px;
 }
 
 .container {
@@ -42,7 +68,9 @@ label {
 
 input[type="text"],
 textarea,
-input[type="file"] {
+input[type="file"],
+input[type="number"], 
+select {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #ccc;
@@ -232,7 +260,19 @@ button:hover {
 
 .filter-title {
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+.filter-section label {
+  font-weight: normal;
+  margin-bottom: 4px;
+}
+
+#filterToggle,
+#activeFilters,
+.filters-sidebar.hidden,
+.apply-btn {
+  display: none;
 }
 
 input[type="file"] {
