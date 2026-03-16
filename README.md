@@ -8,7 +8,6 @@ Most researchers receive funding that doesn't align with their work. MatchMaker 
 
 ## Features
 
-- AI-powered keyword extraction from your project description and uploaded documents
 - Grant search across grants.gov and Northwestern University Foundation Relations
 - Results ranked by relevance to your project
 - Keyword refinement to tune results after your first search
