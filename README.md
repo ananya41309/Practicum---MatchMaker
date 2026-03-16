@@ -1,4 +1,4 @@
-# Researchr
+# MatchMaker
 
 This is a simple Flask web application that allows users to submit a research project description along with relevant files (e.g., papers, datasets, notes). The long-term goal of this project is to assist researchers not only in managing project materials, but also in identifying relevant funding opportunities by automatically matching project descriptions to external grant programs.
 
@@ -79,7 +79,3 @@ Allowed file types can be modified in app.py:
 
 ALLOWED_EXTENSIONS = {"pdf", "docx", "csv", "txt"}
 
-# Nice to Haves / Additional Task Board
-- File preview
-- Accounts - Ananya 
-  - Set up Firebase / database management - Ananya
