@@ -10,14 +10,133 @@ from bs4 import BeautifulSoup
 import re
 from openai import OpenAI
 from api_key import api_key
+from datetime import datetime
 
 search_url = "https://api.grants.gov/v1/api/search2"
 fetchOpp_url = "https://api.grants.gov/v1/api/fetchOpportunity"
 nufr_url = "https://www.northwestern.edu/foundationrelations/find-funding/funding-opportunities/"
 
 #client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+def try_parse_int(x):
+    try:
+        return int(x)
+    except Exception:
+        try:
+            return int(float(x))
+        except Exception:
+            return None
 
-def search_grants(title, description, keywords, client):
+def parse_date_safe(d):
+    """
+    Try common formats and return ISO 'YYYY-MM-DD' or None.
+    Accepts 'MM/DD/YYYY', 'YYYY-MM-DD', or date-like strings, or 'Rolling'.
+    """
+    if not d:
+        return None
+    s = str(d).strip()
+    if s.lower() == "rolling":
+        return "rolling"
+    # try common formats
+    fmts = ["%m/%d/%Y", "%Y-%m-%d", "%m-%d-%Y"]
+    for f in fmts:
+        try:
+            dt = datetime.strptime(s, f)
+            return dt.date().isoformat()
+        except Exception:
+            continue
+    # try to extract using regex mm/dd/yyyy
+    m = re.search(r"(\d{1,2}/\d{1,2}/\d{4})", s)
+    if m:
+        try:
+            dt = datetime.strptime(m.group(1), "%m/%d/%Y")
+            return dt.date().isoformat()
+        except Exception:
+            pass
+    return None
+
+def extract_best_award(r):
+    if r.get("average_award"):
+        v = try_parse_int(r["average_award"])
+        if v is not None:
+            return v
+    # try floor/ceiling
+    floor = try_parse_int(r.get("award_floor"))
+    ceil = try_parse_int(r.get("award_ceiling"))
+    if floor is not None and ceil is not None:
+        return (floor + ceil) // 2
+    if floor is not None:
+        return floor
+    if ceil is not None:
+        return ceil
+    # try 'amount' free text (NU site)
+    amt_field = r.get("amount")
+    if amt_field:
+        # find first integer in string
+        m = re.search(r"[\$]?([\d,]+)", str(amt_field))
+        if m:
+            v = try_parse_int(m.group(1).replace(",", ""))
+            if v is not None:
+                return v
+    return None
+
+def apply_filters(results, status_open, status_forecast, sources, award_min, award_max):
+    """
+    Filter results list in place and return filtered list.
+    sources is a list (e.g. ['federal','foundation']) or empty/None to mean all.
+    award_min/award_max are strings (or None); convert to ints if present.
+    """
+    out = []
+    amin = try_parse_int(award_min) if award_min is not None and award_min != "" else None
+    amax = try_parse_int(award_max) if award_max is not None and award_max != "" else None
+    want_sources = set([s.lower().strip() for s in sources]) if sources else None
+
+    for r in results:
+        src = (r.get("source") or "").lower().strip()
+        if want_sources and src not in want_sources:
+            continue
+
+        # status filter
+        status = str(r.get("status", "")).lower()
+        if (status_open or status_forecast):
+            ok_status = False
+            if status_open:
+                if any(k in status for k in ("open", "posted", "open opportunity", "open_date", "open-now")) or status == "":
+                    ok_status = True
+            if status_forecast:
+                if any(k in status for k in ("forecast", "anticipated", "forecasted", "archived")):
+                    ok_status = True
+            if not ok_status:
+                continue
+
+        # award filter
+        award = extract_best_award(r)
+        if amin is not None and award is not None and award < amin:
+            continue
+        if amax is not None and award is not None and award > amax:
+            continue
+
+        out.append(r)
+    return out
+
+def sort_results(results, sort_by="relevance"):
+    if sort_by == "deadline":
+        # rolling first (lowest key), then earliest date, then unknown
+        def keyfn(r):
+            close = r.get("closeDate") or r.get("deadline") or ""
+            parsed = parse_date_safe(close)
+            if parsed == "rolling":
+                return (0, "")
+            if parsed:
+                try:
+                    return (1, parsed)
+                except Exception:
+                    return (2, "")
+            return (3, "")
+        return sorted(results, key=keyfn)
+    else:
+        return sorted(results, key=lambda x: float(x.get("score", 0)), reverse=True)
+
+def search_grants(title, description, keywords, client, status_open=True, status_forecast = False, sources=None, award_min = None, award_max = None, sort_by="relevance", limit=10):
     #given keyword string, we are going to search through various sources for grants that match the keywords. We will return a list of grants that match the keywords.
     results = []
     
@@ -26,6 +145,10 @@ def search_grants(title, description, keywords, client):
     
     nufr_grants = nufr_search(keywords)
     results.extend(nufr_grants)
+
+    filtered = apply_filters(results, status_open, status_forecast, sources, award_min, award_max)
+    ranked = sort_results(filtered, sort_by = sort_by)
+    top_n = ranked[:limit]
     
     ranked = sorted(results, key=lambda x: x["score"], reverse=True)
     
@@ -34,7 +157,7 @@ def search_grants(title, description, keywords, client):
         response = client.chat.completions.create(
             model="deepseek-chat",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant for ranking grant opportunities based on relevance to a researcher's interests."},
+                {"role": "system", "content": "You are a helpful assistant for summarizing grant opportunities for applying researchers."},
                 {"role": "user", "content": f"Given the following grant opportunity, title: {r['title']}, description: {r['description']}, please return a concise summary of the grant details. This summary should only written as a standard paragraph. Return only the body of the summary without any introductory phrases."}
             ]
         )
@@ -98,10 +221,11 @@ def nufr_search(keywords):
                 cells[0],
                 flags=re.IGNORECASE
             ).strip()
+
             data.append({
                 "description": cleaned,
                 "openDate": "N/A",
-                "closeDate": terminal_value,
+                "closeDate": terminal_value or cells[0],
                 "title": cells[1],
                 "funder": cells[2],
                 "status": cells[3],
@@ -111,7 +235,8 @@ def nufr_search(keywords):
                 "career_stage": cells[5],
                 "discipline": cells[6],
                 "deadline_month": cells[7],
-                "url": grant_url
+                "url": grant_url,
+                "source": "foundation"
             })
             
     def combined_text(entry):
@@ -129,7 +254,7 @@ def nufr_search(keywords):
         r["score"] = keyword_score(combined_text(r), keywords)
 
     ranked = sorted(data, key=lambda x: x["score"], reverse=True)
-    return ranked[:10]  # return top 10 results   
+    return ranked[:50]  # return top 10 results   
 
 def grants_gov_search(title, keywords):
     """
@@ -159,10 +284,10 @@ def grants_gov_search(title, keywords):
         hits = data.get("oppHits", [])
         #print(hits)    
         
-        while not hits and merged_keywords:
+        while not hits and keywords:
             #remove last 2 keywords and try again
-            merged_keywords = merged_keywords[:-2]
-            keyword_string = " ".join(merged_keywords)
+            keywords = keywords[:-2]
+            keyword_string = " ".join(keywords)
             combined_text = f"{title} {keyword_string}"
             
             payload = {
@@ -191,6 +316,7 @@ def grants_gov_search(title, keywords):
             hit_closedate = hit.get("closeDate", "N/A")
             if hit_closedate == "":
                 hit_closedate = "N/A"
+            hit_status = hit.get("oppStatus") or hit.get("status") or "posted"
             opp_response = requests.post(fetchOpp_url, data=json.dumps(opp_payload))
             if opp_response.status_code == 200:
                 opp_data = opp_response.json().get("data", {})
@@ -234,7 +360,9 @@ def grants_gov_search(title, keywords):
                     "award_ceiling": award_ceiling,
                     "award_floor": award_floor,
                     "average_award": average_award,
-                    "url": f"https://www.grants.gov/search-results-detail/{hit_id}"
+                    "url": f"https://www.grants.gov/search-results-detail/{hit_id}",
+                    "source": "federal",
+                    "status": hit_status
                 })
                 
     def combined_text(entry):
@@ -251,4 +379,4 @@ def grants_gov_search(title, keywords):
         r["score"] = keyword_score(combined_text(r), keywords)
 
     ranked = sorted(grants, key=lambda x: x["score"], reverse=True)
-    return ranked[:10]  # return top 10 results
+    return ranked[:50]  # return top 10 results
